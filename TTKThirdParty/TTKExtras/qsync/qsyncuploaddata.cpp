@@ -26,7 +26,7 @@ QSyncUploadData::QSyncUploadData(QNetworkAccessManager *networkManager, QObject 
     d->m_manager = networkManager;
 }
 
-void QSyncUploadData::uploadDataOperator(const QString &time, const QString &bucket, const QString &fileName, const QString &filePath)
+void QSyncUploadData::request(const QString &time, const QString &bucket, const QString &fileName, const QString &filePath)
 {
     TTK_D(QSyncUploadData);
     d->m_uploadTime = time;
@@ -37,14 +37,14 @@ void QSyncUploadData::uploadDataOperator(const QString &time, const QString &buc
     const QString &host = bucket + TTK_DOT + QSyncConfig::HOST;
 
     TTKStringMap headers;
-    headers.insert("Date", QSyncUtils::GMT());
     headers.insert("Host", host);
+    headers.insert("Date", QSyncUtils::GMT());
     headers.insert("Content-Type", "charset=utf-8");
 
     d->insertAuthorization(method, headers, resource);
 
     QNetworkRequest request;
-    request.setUrl("http://" + host + url);
+    request.setUrl(HTTP_PROTOCOL + host + url);
 
     for(auto it = headers.constBegin(); it != headers.constEnd(); ++it)
     {
@@ -89,8 +89,8 @@ void QSyncUploadData::receiveDataFromServer()
     }
 }
 
-void QSyncUploadData::uploadProgress(qint64 bytesSent, qint64 bytesTotal)
+void QSyncUploadData::uploadProgress(qint64 percent, qint64 total)
 {
     TTK_D(QSyncUploadData);
-    Q_EMIT uploadProgressChanged(d->m_uploadTime, bytesSent, bytesTotal);
+    Q_EMIT uploadProgressChanged(d->m_uploadTime, percent, total);
 }
